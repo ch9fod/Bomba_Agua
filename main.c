@@ -12,34 +12,54 @@
 #include <stdbool.h>       /* For true/false definition */
 #include <pic12f609.h>
 
-__CONFIG(FOSC_INTOSCIO & WDTE_OFF & CP_OFF & MCLRE_OFF & PWRTE_OFF & IOSCFS_8MHZ);
+__CONFIG(FOSC_INTOSCIO & WDTE_OFF & CP_OFF  & PWRTE_OFF & IOSCFS_8MHZ);//MCLRE_OFF
 
 #ifndef _XTAL_FREQ
  // Unless already defined assume 4MHz system frequency
  // This definition is required to calibrate __delay_us() and __delay_ms()
  #define _XTAL_FREQ 8000000
 #endif
-unsigned char cnt=0;
+
+
+unsigned char cnt=0,i,j;
 bit in;
-    /*GPIO =  (buff = ~buff); //All on
-    __delay_ms(255);*/
+
+void delay_1s ()
+{
+    for (i=0; i<100; i++)
+        for (j=0; j<10; j++)
+            __delay_ms(1);
+}
+
 void main(void) {
-    nGPPU = 1;  //Global pullups enabled
+    nGPPU = 0;  //Global pullups enabled
     WPU2 = 1;   //Pullup on GPIO2 enabled
     TRISIO = 4; //GPIO2 input
     INTEDG = 0; //falling edge external interrupt on GPIO2
-//    IOC2 = 1;   //Interrupt on change enabled GPIO2
     INTE = 1;   //External interrupt on GPIO2 enabled
-//    ei();       //Global interrupts enabled
+
+    GP4 = 1;
+    delay_1s();
+    GP4 = 0;
+    delay_1s();
+    GP4 = 1;
+    delay_1s();
+    GP4 = 0;
+    delay_1s();
+
     SLEEP();
     NOP();
-}
+    
+    while(1){
+        GP4 = 1;
+        delay_1s();
+        GP4 = 0;
+        delay_1s();
+        INTF = 0;   //Clear External interrupt flag
+        INTE = 1;   // Enable external interrupt INT
+        SLEEP();
+        NOP();
 
-void interrupt ISR(){   // ISR
-    if(T0IF == 1){      //If Timer0 Flag enabled
-        T0IF = 0;       //Clear T0 Interrupt
-        in = 1;         //Enable internal flag
-        TMR0 = 55;     // for 0.1ms delay (more or less)
     }
 }
 
