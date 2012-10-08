@@ -20,15 +20,25 @@ __CONFIG(FOSC_INTOSCIO & WDTE_OFF & CP_OFF  & PWRTE_OFF & IOSCFS_8MHZ);//MCLRE_O
  #define _XTAL_FREQ 8000000
 #endif
 
+void delay_Xm (unsigned char x)
+{
+unsigned char i = 0;
+	for(i=0; i<x; i++)
+		delay_1m();
+}
 
-unsigned char cnt=0,i,j;
-bit in;
+void delay_1m ()
+{
+unsigned char i = 0;
+	for (i=0; i<60; i++)
+		delay_1s();
+}
 
 void delay_1s ()
 {
+unsigned char i = 0;
     for (i=0; i<100; i++)
-        for (j=0; j<10; j++)
-            __delay_ms(1);
+		__delay_ms(10);
 }
 
 void main(void) {
@@ -52,14 +62,12 @@ void main(void) {
     
     while(1){
         GP4 = 1;
-        delay_1s();
+		delay_Xm(10);
         GP4 = 0;
-        delay_1s();
         INTF = 0;   //Clear External interrupt flag
         INTE = 1;   // Enable external interrupt INT
         SLEEP();
         NOP();
-
     }
 }
 
